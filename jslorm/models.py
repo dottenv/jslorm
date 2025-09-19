@@ -42,18 +42,34 @@ class BaseModel(PydanticBaseModel, metaclass=BaseModelMeta):
         if cls.__schema__:
             return cls.__schema__
         
-        # Автогенерация схемы из полей модели (Pydantic v2)
+        # Автогенерация схемы (совместимость с Pydantic v1 и v2)
         schema = {}
-        for field_name, field_info in cls.model_fields.items():
-            field_type = field_info.annotation
-            if field_type == int:
-                schema[field_name] = "int"
-            elif field_type == str:
-                schema[field_name] = "str"
-            elif field_type == bool:
-                schema[field_name] = "bool"
-            else:
-                schema[field_name] = "str"
+        try:
+            # Pydantic v2
+            fields = cls.model_fields
+            for field_name, field_info in fields.items():
+                field_type = field_info.annotation
+                if field_type == int:
+                    schema[field_name] = "int"
+                elif field_type == str:
+                    schema[field_name] = "str"
+                elif field_type == bool:
+                    schema[field_name] = "bool"
+                else:
+                    schema[field_name] = "str"
+        except AttributeError:
+            # Pydantic v1
+            fields = cls.__fields__
+            for field_name, field_info in fields.items():
+                field_type = field_info.type_
+                if field_type == int:
+                    schema[field_name] = "int"
+                elif field_type == str:
+                    schema[field_name] = "str"
+                elif field_type == bool:
+                    schema[field_name] = "bool"
+                else:
+                    schema[field_name] = "str"
         return schema
     
     @classmethod

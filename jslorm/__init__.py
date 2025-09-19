@@ -8,7 +8,7 @@ from .monitoring import HealthChecker
 from .performance import AggregationManager
 from .migrations import MigrationEngine, ModelRegistry
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __author__ = "Support Bot Team"
 
 class Database:
