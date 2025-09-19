@@ -1,5 +1,5 @@
 from pydantic import BaseModel as PydanticBaseModel, Field
-from typing import Optional, Dict, Any, ClassVar, List
+from typing import Optional, Dict, Any, ClassVar, List, Union
 from .relations import foreign_key, relationship, RelationType
 
 class BaseModelMeta(type(PydanticBaseModel)):
@@ -49,6 +49,10 @@ class BaseModel(PydanticBaseModel, metaclass=BaseModelMeta):
             fields = cls.model_fields
             for field_name, field_info in fields.items():
                 field_type = field_info.annotation
+                # Handle Optional types
+                if hasattr(field_type, '__origin__') and field_type.__origin__ is Union:
+                    field_type = field_type.__args__[0]  # Get first type from Optional[Type]
+                
                 if field_type == int:
                     schema[field_name] = "int"
                 elif field_type == str:
@@ -62,6 +66,10 @@ class BaseModel(PydanticBaseModel, metaclass=BaseModelMeta):
             fields = cls.__fields__
             for field_name, field_info in fields.items():
                 field_type = field_info.type_
+                # Handle Optional types
+                if hasattr(field_type, '__origin__') and field_type.__origin__ is Union:
+                    field_type = field_type.__args__[0]
+                
                 if field_type == int:
                     schema[field_name] = "int"
                 elif field_type == str:
