@@ -7,7 +7,7 @@ Advanced JSON-based ORM for Python with async support, query builder, caching, a
 ## Installation
 
 ```bash
-pip install jslorm
+pip install git+https://github.com/dottenv/jslorm.git
 ```
 
 ## Quick Start
