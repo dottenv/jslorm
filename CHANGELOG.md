@@ -2,6 +2,21 @@
 
 All notable changes to JSLORM will be documented in this file.
 
+## [1.1.0] - 2024-01-XX
+
+### Fixed
+- 🐛 **CRITICAL**: Fixed DatabaseDriver.select() to support query_builder parameter
+- 🐛 **CRITICAL**: Removed broken @timed_operation and @cached decorators
+- 🐛 **CRITICAL**: Fixed BaseRepository to use correct DatabaseDriver API
+- ✅ Fixed query operators (age__gte=18, name__like="John") in BaseRepository.find()
+- 🔄 Fixed QueryBuilder.apply_filters() integration
+- 🔍 Improved model discovery in migrations
+
+### Changed
+- 📝 Synchronized BaseRepository with DatabaseDriver API
+- ⚡ QueryBuilder now properly integrated with select() method
+- 🔧 Simplified decorator system (removed problematic decorators)
+
 ## [1.0.2] - 2024-01-XX
 
 ### Fixed

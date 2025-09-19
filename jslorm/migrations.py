@@ -41,24 +41,32 @@ class ModelRegistry:
     def _scan_file_for_models(cls, file_path: str):
         """Сканирует файл на наличие моделей"""
         try:
-            # Получаем относительный путь для импорта
-            rel_path = os.path.relpath(file_path, cls._app_path)
-            module_path = rel_path.replace(os.sep, '.').replace('.py', '')
+            import sys
+            import importlib.util
+            
+            # Получаем имя модуля
+            module_name = os.path.splitext(os.path.basename(file_path))[0]
             
             # Импортируем модуль
-            spec = importlib.util.spec_from_file_location(module_path, file_path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            
-            # Ищем классы-наследники BaseModel
-            for name, obj in inspect.getmembers(module, inspect.isclass):
-                if (issubclass(obj, BaseModel) and 
-                    obj != BaseModel and 
-                    hasattr(obj, '__table_name__')):
-                    cls.register_model(obj)
-                    
+            spec = importlib.util.spec_from_file_location(module_name, file_path)
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[module_name] = module
+                spec.loader.exec_module(module)
+                
+                # Ищем классы-наследники BaseModel
+                for name, obj in inspect.getmembers(module, inspect.isclass):
+                    if (obj.__module__ == module_name and 
+                        issubclass(obj, BaseModel) and 
+                        obj != BaseModel and 
+                        hasattr(obj, '__table_name__') and 
+                        obj.__table_name__):
+                        cls.register_model(obj)
+                        print(f"✅ Found model: {obj.__name__} -> {obj.__table_name__}")
+                        
         except Exception as e:
             # Игнорируем ошибки импорта
+            print(f"⚠️  Error scanning {file_path}: {e}")
             pass
 
 class MigrationEngine:

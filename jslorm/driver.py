@@ -64,16 +64,21 @@ class DatabaseDriver:
             await self._save_data(data)
             return record_id
 
-    async def select(self, table_name: str, where: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    async def select(self, table_name: str, where: Optional[Dict[str, Any]] = None, 
+                    query_builder: Optional['QueryBuilder'] = None) -> List[Dict[str, Any]]:
         data = await self._load_data()
         if table_name not in data["tables"]:
             return []
         
         records = data["tables"][table_name]["records"]
-        if not where:
-            return records
         
-        return [r for r in records if all(r.get(k) == v for k, v in where.items())]
+        # Применяем QueryBuilder если есть
+        if query_builder:
+            records = query_builder.apply_filters(records)
+        elif where:
+            records = [r for r in records if all(r.get(k) == v for k, v in where.items())]
+        
+        return records
 
     async def select_one(self, table_name: str, where: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         records = await self.select(table_name, where)

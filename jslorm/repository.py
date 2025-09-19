@@ -2,16 +2,13 @@ from typing import List, Optional, Dict, Any, Type, Union
 from .driver import DatabaseDriver
 from .models import BaseModel
 from .query import QueryBuilder, Operator
-from .monitoring import timed_operation, cached, DatabaseLogger, MetricsCollector
+from .monitoring import DatabaseLogger, MetricsCollector
 
 class BaseRepository:
     def __init__(self, db_driver: DatabaseDriver, model_class: Type[BaseModel]):
         self.db = db_driver
         self.model_class = model_class
         self.table = model_class.get_table_name()
-        self.logger = DatabaseLogger()
-        self.metrics = MetricsCollector()
-        self._cache = {}
 
     async def create_table(self):
         schema = self.model_class.get_schema()
@@ -21,18 +18,15 @@ class BaseRepository:
         for field in self.model_class.get_indexes():
             self.db.index_manager.create_index(self.table, field)
 
-    @timed_operation
     async def create(self, model: BaseModel) -> BaseModel:
         data = model.dict(exclude={'id', 'created_at', 'updated_at'})
         record_id = await self.db.insert(self.table, data)
         return await self.get_by_id(record_id)
 
-    @cached
     async def get_by_id(self, id: int) -> Optional[BaseModel]:
         data = await self.db.select_one(self.table, {"id": id})
         return self.model_class(**data) if data else None
 
-    @cached
     async def get_all(self, limit: Optional[int] = None, offset: Optional[int] = None) -> List[BaseModel]:
         query = self.db.query(self.table)
         if limit:
@@ -43,7 +37,6 @@ class BaseRepository:
         records = await self.db.select(self.table, query_builder=query)
         return [self.model_class(**record) for record in records]
 
-    @cached
     async def find(self, where: Dict[str, Any] = None, **kwargs) -> List[BaseModel]:
         query = self.db.query(self.table)
         
@@ -86,10 +79,8 @@ class BaseRepository:
     async def avg(self, field: str, where: Dict[str, Any] = None) -> float:
         return await self.db.aggregate(self.table, "avg", field, where)
 
-    @timed_operation
     async def update(self, id: int, updates: Dict[str, Any]) -> bool:
         return await self.db.update(self.table, {"id": id}, updates) > 0
 
-    @timed_operation
     async def delete(self, id: int) -> bool:
         return await self.db.delete(self.table, {"id": id}) > 0
