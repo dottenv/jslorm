@@ -1,23 +1,4 @@
 # Release v1.0.1
-
-## Git Commands to Create Release
-
-```bash
-# Add all changes
-git add .
-
-# Commit changes
-git commit -m "Release v1.0.1: Fix decorator bugs and improve documentation"
-
-# Create and push tag
-git tag -a v1.0.1 -m "Release v1.0.1: Fix decorator bugs"
-git push origin main
-git push origin v1.0.1
-
-# Create GitHub release (optional)
-gh release create v1.0.1 --title "v1.0.1" --notes "Fixed decorator bugs in monitoring system"
-```
-
 ## Update Library in Project
 
 ```bash
