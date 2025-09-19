@@ -42,10 +42,10 @@ dev = [
 jslorm = "jslorm.cli:main"
 
 [project.urls]
-Homepage = ""
+Homepage = "https://github.com/dottenv/jslorm"
 Repository = "https://github.com/dottenv/jslorm.git"
-Documentation = "https://github.com/yourusername/jslorm#readme"
-"Bug Tracker" = ""
+Documentation = "https://github.com/dottenv/jslorm#readme"
+"Bug Tracker" = "https://github.com/dottenv/jslorm/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
