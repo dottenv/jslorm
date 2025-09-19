@@ -42,10 +42,10 @@ class BaseModel(PydanticBaseModel, metaclass=BaseModelMeta):
         if cls.__schema__:
             return cls.__schema__
         
-        # Автогенерация схемы из полей модели
+        # Автогенерация схемы из полей модели (Pydantic v2)
         schema = {}
-        for field_name, field_info in cls.__fields__.items():
-            field_type = field_info.type_
+        for field_name, field_info in cls.model_fields.items():
+            field_type = field_info.annotation
             if field_type == int:
                 schema[field_name] = "int"
             elif field_type == str:

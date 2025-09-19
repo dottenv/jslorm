@@ -2,6 +2,12 @@
 
 All notable changes to JSLORM will be documented in this file.
 
+## [1.0.2] - 2024-01-XX
+
+### Fixed
+- 🐛 Fixed Pydantic v2 compatibility (`model_fields` instead of `__fields__`)
+- ✅ Fixed schema generation for newer Pydantic versions
+
 ## [1.0.1] - 2024-01-XX
 
 ### Fixed
