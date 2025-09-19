@@ -37,9 +37,9 @@ db = Database("myapp", enable_compression=True)
 user_repo = BaseRepository(db.driver, User)
 post_repo = BaseRepository(db.driver, Post)
 
-# Create tables
-await user_repo.create_table()
-await post_repo.create_table()
+# Auto-discover and create tables
+db = Database("myapp", enable_compression=True)
+await db.init_db()  # Finds all models automatically
 
 # Advanced queries
 users = await user_repo.find(age__gte=18, name__like="John")
@@ -194,10 +194,8 @@ async def logging_middleware(operation, table, data, context):
     return data
 
 async def main():
-    # Setup database
-    await user_repo.create_table()
-    await ticket_repo.create_table()
-    await message_repo.create_table()
+    # Auto-discover and setup database
+    await db.init_db()  # Automatically finds and creates all tables
     
     # Add middleware
     db.add_middleware(logging_middleware)
@@ -351,8 +349,14 @@ db.add_middleware(performance_middleware)
 ## CLI Commands
 
 ```bash
-# Initialize database
+# Initialize database (auto-discovers all models)
 jslorm init
+
+# Apply migrations (updates schema)
+jslorm db-upgrade
+
+# Show migration status
+jslorm db-status
 
 # Create backup
 jslorm backup
@@ -583,8 +587,7 @@ async def stats_handler(message: types.Message):
 
 async def main():
     # Инициализация БД
-    await user_repo.create_table()
-    await ticket_repo.create_table()
+    await db.init_db()  # Автоматически находит и создает все таблицы
     
     # Запуск бота
     await dp.start_polling(bot)
@@ -672,8 +675,14 @@ else:
 ## CLI команды
 
 ```bash
-# Инициализация базы данных
+# Инициализация базы данных (автопоиск моделей)
 jslorm init
+
+# Применение миграций (обновление схемы)
+jslorm db-upgrade
+
+# Статус миграций
+jslorm db-status
 
 # Создание резервной копии
 jslorm backup

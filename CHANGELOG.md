@@ -2,6 +2,17 @@
 
 All notable changes to JSLORM will be documented in this file.
 
+## [1.0.1] - 2024-01-XX
+
+### Fixed
+- 🐛 Fixed decorator bugs in monitoring.py (timed_operation and cached decorators)
+- 🔧 Fixed BaseRepository initialization with proper logger and metrics
+- ✅ Resolved TypeError in CLI commands
+
+### Changed
+- 📝 Updated documentation with correct migration examples
+- 🔄 Improved decorator implementation to work without arguments
+
 ## [1.0.0] - 2024-01-XX
 
 ### Added
@@ -12,8 +23,9 @@ All notable changes to JSLORM will be documented in this file.
 - 📊 Aggregation functions (count, sum, avg, min, max)
 - 🛡️ Schema validation and unique constraints
 - 📈 Performance monitoring and metrics
-- 🔧 CLI commands for migrations (Flask-SQLAlchemy style)
-- 🗂️ Automatic model discovery from multiple files
+- 🔧 CLI commands for migrations with automatic model discovery
+- 🗂️ Auto-discovery of models from project files (no manual registration needed)
+- 🔄 Automatic table creation and schema updates
 - 💾 Backup/restore functionality
 - 🔄 Middleware support for logging and custom logic
 - 📦 Data compression for production use
@@ -21,8 +33,8 @@ All notable changes to JSLORM will be documented in this file.
 - 🎯 Pagination support for large datasets
 
 ### Features
-- **Models**: Pydantic-based models with auto-registration
-- **Migrations**: Automatic model discovery and migration system
+- **Models**: Pydantic-based models with automatic discovery
+- **Migrations**: Auto-discovery system - no manual model registration required
 - **CLI**: `jslorm init`, `jslorm db-upgrade`, `jslorm db-status`
 - **Performance**: Caching, indexing, compression
 - **Monitoring**: Metrics, logging, health checks
@@ -40,14 +52,18 @@ jslorm stats        # Show database statistics
 
 ### Example Usage
 ```python
-from jslorm import Database, BaseModel, BaseRepository, foreign_key
+from jslorm import Database, BaseModel, BaseRepository
 
+# Just define models - they're auto-discovered
 class User(BaseModel):
     name: str
     email: str
     __table_name__ = "users"
-    __indexes__ = ["email"]
 
+# Initialize and auto-discover all models
 db = Database("myapp")
-await db.init_db()  # Auto-discovers models
+await db.init_db()  # Finds all BaseModel classes automatically
+
+# Or use CLI
+# jslorm init
 ```

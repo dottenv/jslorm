@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "jslorm"
-version = "1.0.0"
+version = "1.0.1"
 description = "Advanced JSON-based ORM for Python with async support, query builder, caching, and production-ready features"
 readme = "README.md"
 authors = [{name = "Support Bot Team", email = "support@example.com"}]

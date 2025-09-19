@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="jslorm",
-    version="1.0.0",
+    version="1.0.1",
     author="Support Bot Team",
     description="Advanced JSON-based ORM with query builder, caching, and production features",
     long_description=long_description,

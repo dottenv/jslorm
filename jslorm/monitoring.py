@@ -79,50 +79,52 @@ class MiddlewareManager:
                 result = middleware(operation, table, result, context)
         return result
 
-def timed_operation(logger: DatabaseLogger, metrics: MetricsCollector):
-    def decorator(func):
-        @wraps(func)
-        async def wrapper(self, *args, **kwargs):
-            start_time = time.time()
-            operation = func.__name__
-            table = getattr(self, 'table', 'unknown')
+def timed_operation(func):
+    @wraps(func)
+    async def wrapper(self, *args, **kwargs):
+        start_time = time.time()
+        operation = func.__name__
+        table = getattr(self, 'table', 'unknown')
+        
+        try:
+            result = await func(self, *args, **kwargs)
+            duration = time.time() - start_time
             
-            try:
-                result = await func(self, *args, **kwargs)
-                duration = time.time() - start_time
-                
-                logger.log_query(operation, table, duration, kwargs.get('where'))
-                metrics.record_query(operation, duration)
-                
-                return result
-            except Exception as e:
-                duration = time.time() - start_time
-                logger.log_error(operation, table, e)
-                metrics.record_error()
-                raise
-        return wrapper
-    return decorator
+            # Используем logger и metrics из self, если есть
+            if hasattr(self, 'logger'):
+                self.logger.log_query(operation, table, duration, kwargs.get('where'))
+            if hasattr(self, 'metrics'):
+                self.metrics.record_query(operation, duration)
+            
+            return result
+        except Exception as e:
+            duration = time.time() - start_time
+            if hasattr(self, 'logger'):
+                self.logger.log_error(operation, table, e)
+            if hasattr(self, 'metrics'):
+                self.metrics.record_error()
+            raise
+    return wrapper
 
-def cached(cache_manager):
-    def decorator(func):
-        @wraps(func)
-        async def wrapper(self, *args, **kwargs):
-            # Кэшируем только SELECT операции
-            if func.__name__ in ['select', 'select_one', 'find', 'get_all']:
+def cached(func):
+    @wraps(func)
+    async def wrapper(self, *args, **kwargs):
+        # Кэшируем только SELECT операции
+        if func.__name__ in ['select', 'select_one', 'find', 'get_all', 'get_by_id']:
+            # Простое кэширование - можно расширить позже
+            if hasattr(self, '_cache'):
                 table = getattr(self, 'table', 'unknown')
-                cache_key = {"args": args, "kwargs": kwargs}
+                cache_key = f"{func.__name__}_{str(args)}_{str(kwargs)}"
                 
-                cached_result = cache_manager.get(table, cache_key)
-                if cached_result is not None:
-                    return cached_result
+                if cache_key in self._cache:
+                    return self._cache[cache_key]
                 
                 result = await func(self, *args, **kwargs)
-                cache_manager.set(table, cache_key, result)
+                self._cache[cache_key] = result
                 return result
-            
-            return await func(self, *args, **kwargs)
-        return wrapper
-    return decorator
+        
+        return await func(self, *args, **kwargs)
+    return wrapper
 
 def validate_input(validator_func: Callable):
     def decorator(func):

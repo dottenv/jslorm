@@ -2,13 +2,16 @@ from typing import List, Optional, Dict, Any, Type, Union
 from .driver import DatabaseDriver
 from .models import BaseModel
 from .query import QueryBuilder, Operator
-from .monitoring import timed_operation, cached
+from .monitoring import timed_operation, cached, DatabaseLogger, MetricsCollector
 
 class BaseRepository:
     def __init__(self, db_driver: DatabaseDriver, model_class: Type[BaseModel]):
         self.db = db_driver
         self.model_class = model_class
         self.table = model_class.get_table_name()
+        self.logger = DatabaseLogger()
+        self.metrics = MetricsCollector()
+        self._cache = {}
 
     async def create_table(self):
         schema = self.model_class.get_schema()
